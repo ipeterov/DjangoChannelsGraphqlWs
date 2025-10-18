@@ -730,11 +730,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
             variables = payload.get("variables", {})
 
             # Prepare a context object.
-            context = DictAsObject({})
-            context.channels_scope = self.scope
-            context.channel_name = self.channel_name
-            context.graphql_operation_name = op_name
-            context.graphql_operation_id = op_id
+            context = self.get_context()
 
             # Process the request with Graphene and GraphQL-core.
             doc_ast, op_ast, errors = await self._on_gql_subscribe__parse_query(
@@ -1472,3 +1468,11 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
         # consumer constructor, so we added this property.
         assert self.channel_layer is not None, "Channel layer is not configured!"
         return self.channel_layer
+
+    def get_context(self):
+        context = DictAsObject({})
+        context.channels_scope = self.scope
+        context.channel_name = self.channel_name
+        context.graphql_operation_name = op_name
+        context.graphql_operation_id = op_id
+        return context
